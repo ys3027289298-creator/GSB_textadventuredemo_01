@@ -308,8 +308,8 @@ def displayLocation(loc):
     print()
     if showFullExits:
         for direction in (NORTH, SOUTH, EAST, WEST, UP, DOWN):
-            if direction in worldRooms[location]:
-                print('%s: %s' % (direction.title(), worldRooms[location][direction]))
+            if direction in worldRooms[loc]:
+                print('%s: %s' % (direction.title(), worldRooms[loc][direction]))
     else:
         print('Exits: %s' % ' '.join(exits))
 
@@ -328,30 +328,30 @@ def moveDirection(direction):
 
 def getAllDescWords(itemList):
     """Returns a list of "description words" for each item named in itemList."""
-    itemList = list(set(itemList)) # make itemList unique
+    itemList = list(dict.fromkeys(itemList)) # make itemList unique
     descWords = []
     for item in itemList:
         descWords.extend(worldItems[item][DESCWORDS])
-    return list(set(descWords))
+    return list(dict.fromkeys(descWords))
 
 def getAllFirstDescWords(itemList):
     """Returns a list of the first "description word" in the list of
     description words for each item named in itemList."""
-    itemList = list(set(itemList)) # make itemList unique
+    itemList = list(dict.fromkeys(itemList)) # make itemList unique
     descWords = []
     for item in itemList:
         descWords.append(worldItems[item][DESCWORDS][0])
-    return list(set(descWords))
+    return list(dict.fromkeys(descWords))
 
 def getFirstItemMatchingDesc(desc, itemList):
-    itemList = list(set(itemList)) # make itemList unique
+    itemList = list(dict.fromkeys(itemList)) # make itemList unique
     for item in itemList:
         if desc in worldItems[item][DESCWORDS]:
             return item
     return None
 
 def getAllItemsMatchingDesc(desc, itemList):
-    itemList = list(set(itemList)) # make itemList unique
+    itemList = list(dict.fromkeys(itemList)) # make itemList unique
     matchingItems = []
     for item in itemList:
         if desc in worldItems[item][DESCWORDS]:
@@ -360,6 +360,15 @@ def getAllItemsMatchingDesc(desc, itemList):
 
 class TextAdventureCmd(cmd.Cmd):
     prompt = '\n> '
+
+    def emptyline(self):
+        pass
+
+    def precmd(self, line):
+        return line.strip().lower()
+
+    def do_EOF(self, arg):
+        return True
 
     # The default() method is called when none of the other do_*() command methods match.
     def default(self, arg):
