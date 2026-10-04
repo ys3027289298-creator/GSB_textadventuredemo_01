@@ -308,8 +308,8 @@ def displayLocation(loc):
     print()
     if showFullExits:
         for direction in (NORTH, SOUTH, EAST, WEST, UP, DOWN):
-            if direction in worldRooms[location]:
-                print('%s: %s' % (direction.title(), worldRooms[location][direction]))
+            if direction in worldRooms[loc]:
+                print('%s: %s' % (direction.title(), worldRooms[loc][direction]))
     else:
         print('Exits: %s' % ' '.join(exits))
 
@@ -328,30 +328,30 @@ def moveDirection(direction):
 
 def getAllDescWords(itemList):
     """Returns a list of "description words" for each item named in itemList."""
-    itemList = list(set(itemList)) # make itemList unique
+    itemList = list(dict.fromkeys(itemList)) # make itemList unique
     descWords = []
     for item in itemList:
         descWords.extend(worldItems[item][DESCWORDS])
-    return list(set(descWords))
+    return list(dict.fromkeys(descWords))
 
 def getAllFirstDescWords(itemList):
     """Returns a list of the first "description word" in the list of
     description words for each item named in itemList."""
-    itemList = list(set(itemList)) # make itemList unique
+    itemList = list(dict.fromkeys(itemList)) # make itemList unique
     descWords = []
     for item in itemList:
         descWords.append(worldItems[item][DESCWORDS][0])
-    return list(set(descWords))
+    return list(dict.fromkeys(descWords))
 
 def getFirstItemMatchingDesc(desc, itemList):
-    itemList = list(set(itemList)) # make itemList unique
+    itemList = list(dict.fromkeys(itemList)) # make itemList unique
     for item in itemList:
         if desc in worldItems[item][DESCWORDS]:
             return item
     return None
 
 def getAllItemsMatchingDesc(desc, itemList):
-    itemList = list(set(itemList)) # make itemList unique
+    itemList = list(dict.fromkeys(itemList)) # make itemList unique
     matchingItems = []
     for item in itemList:
         if desc in worldItems[item][DESCWORDS]:
@@ -360,6 +360,17 @@ def getAllItemsMatchingDesc(desc, itemList):
 
 class TextAdventureCmd(cmd.Cmd):
     prompt = '\n> '
+
+    def emptyline(self):
+        pass
+
+    def precmd(self, line):
+        if line == 'EOF':
+            return line
+        return line.strip().lower()
+
+    def do_EOF(self, arg):
+        return True
 
     # The default() method is called when none of the other do_*() command methods match.
     def default(self, arg):
@@ -423,7 +434,7 @@ class TextAdventureCmd(cmd.Cmd):
         """"take <item> - Take an item on the ground."""
 
         # put this value in a more suitably named variable
-        itemToTake = arg.lower()
+        itemToTake = arg.strip().lower()
 
         if itemToTake == '':
             print('Take what? Type "look" the items on the ground here.')
@@ -451,7 +462,11 @@ class TextAdventureCmd(cmd.Cmd):
         """"drop <item> - Drop an item from your inventory onto the ground."""
 
         # put this value in a more suitably named variable
-        itemToDrop = arg.lower()
+        itemToDrop = arg.strip().lower()
+
+        if itemToDrop == '':
+            print('Drop what?')
+            return
 
         # get a list of all "description words" for each item in the inventory
         invDescWords = getAllDescWords(inventory)
@@ -479,12 +494,12 @@ class TextAdventureCmd(cmd.Cmd):
             return getAllFirstDescWords(worldRooms[location][GROUND])
 
         # otherwise, get a list of all "description words" for ground items matching the command text so far:
-        for item in list(set(worldRooms[location][GROUND])):
+        for item in list(dict.fromkeys(worldRooms[location][GROUND])):
             for descWord in worldItems[item][DESCWORDS]:
                 if descWord.startswith(text) and worldItems[item].get(TAKEABLE, True):
                     possibleItems.append(descWord)
 
-        return list(set(possibleItems)) # make list unique
+        return list(dict.fromkeys(possibleItems)) # make list unique
 
 
     def complete_drop(self, text, line, begidx, endidx):
@@ -507,7 +522,7 @@ class TextAdventureCmd(cmd.Cmd):
             if descWord.startswith(text):
                 possibleItems.append(descWord)
 
-        return list(set(possibleItems)) # make list unique
+        return list(dict.fromkeys(possibleItems)) # make list unique
 
 
     def do_look(self, arg):
@@ -517,7 +532,7 @@ class TextAdventureCmd(cmd.Cmd):
 "look exits" - display the description of all adjacent areas
 "look <item>" - display the description of an item on the ground or in your inventory"""
 
-        lookingAt = arg.lower()
+        lookingAt = arg.strip().lower()
         if lookingAt == '':
             # "look" will re-print the area description
             displayLocation(location)
@@ -581,7 +596,7 @@ class TextAdventureCmd(cmd.Cmd):
             for direction in (NORTH, SOUTH, EAST, WEST, UP, DOWN):
                 if direction in worldRooms[location]:
                     possibleItems.append(direction)
-            return list(set(possibleItems)) # make list unique
+            return list(dict.fromkeys(possibleItems)) # make list unique
 
         # otherwise, get a list of all "description words" for ground items matching the command text so far:
         for descWord in groundDescWords:
@@ -603,7 +618,7 @@ class TextAdventureCmd(cmd.Cmd):
             if descWord.startswith(lookingAt):
                 possibleItems.append(descWord)
 
-        return list(set(possibleItems)) # make list unique
+        return list(dict.fromkeys(possibleItems)) # make list unique
 
 
 if __name__ == '__main__':

@@ -308,8 +308,8 @@ def displayLocation(loc):
     print()
     if showFullExits:
         for direction in (NORTH, SOUTH, EAST, WEST, UP, DOWN):
-            if direction in worldRooms[location]:
-                print('%s: %s' % (direction.title(), worldRooms[location][direction]))
+            if direction in worldRooms[loc]:
+                print('%s: %s' % (direction.title(), worldRooms[loc][direction]))
     else:
         print('Exits: %s' % ' '.join(exits))
 
@@ -329,7 +329,10 @@ def moveDirection(direction):
 # TEMPORARY CODE:
 while True:
     displayLocation(location)
-    response = input()
+    try:
+        response = input().strip().lower()
+    except EOFError:
+        break
     if response == 'quit':
         break
     if response in (NORTH, SOUTH, EAST, WEST, UP, DOWN):
